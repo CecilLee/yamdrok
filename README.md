@@ -2,7 +2,7 @@ yamdrok
 =========
 
 
-(http://github.com/takumi4ichi/yamdrok/raw/master/pic/yamdrok-0013.jpg)
+![yamdrok](http://github.com/takumi4ichi/yamdrok/raw/master/pic/yamdrok-0013.jpg)
 
 
 
