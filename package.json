@@ -1,0 +1,38 @@
+{
+  "name": "yamdrok",
+  "description": "a jcon-based css parser",
+  "version": "0.1.0",
+  "homepage": "https://github.com/takumi4ichi",
+  "author": {
+    "name": "takumi4ichi",
+    "email": "takumi4ichi@gmail.com"
+  },
+  "main": "./src/yamdrok.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:takumi4ichi/yamdrok.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "/blob/master/LICENSE"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-nodeunit": "^0.4.1"
+  },
+  "dependencies": {
+    "jcon": "^0.2.6",
+    "shorthair": "^0.1.7"
+  },
+  "keywords": [
+    "lib",
+    "javascript",
+    "css",
+    "parser"
+  ]
+}
