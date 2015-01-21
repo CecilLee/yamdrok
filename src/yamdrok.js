@@ -78,7 +78,56 @@ var yamdrok = (function(){
         jcon.seq(import_sym, space_list.possible(), string, space_list.possible(), medium_list.possible(), jcon.string(';'), space_list.possible())
     );
 
+    var namespace = jcon.seq(namespace_sym, space_list.possible(), jcon.seq(namespace_prefix, space_list.possible()).possible(), jcon.or(string, uri), space_list.possible(), jcon.string(';'), space_list.possible());
 
+    var namespace_prefix = ident;
+
+    var viewport = jcon.seq(viewport_sym, space_list.possible(), jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
+
+    var ruleset_list = jcon.lazy(function(){
+        return jcon.seq(ruleset_list.possible, ruleset);
+    });
+
+    var media = jcon.seq(media_sym, space_list.possible(), media_query_list.possible(), jcon.string('{'), space_list.possible(), ruleset_or_viewport_list.possible(), jcon.string('}'), space_list.possible());
+
+    var media_query_list = jcon.lazy(function(){
+        return jcon.or(
+            jcon.seq(media_query_list, jcon.string(','), space_list.possible(), media_query)
+            media_query
+        );
+    });
+
+    var media_query = jcon.lazy(function(){
+        return jcon.or(
+            jcon.seq(jcon.or(only_sym, not_sym).possible(), space_list.possible(), media_type, space_list.possible()),
+            media_expression,
+            jcon.seq(media_query, and_sym, space_list.possible(), media_expression)
+        );
+    });
+
+    var media_type = ident;
+
+    var media_expression = jcon.seq(jcon.string('('), space_list.possible(), media_feature, space_list.possible(), jcon.seq(jcon.string(':'), space_list.possible(), expr).possible(), jcon.string(')'), space_list.possible());
+
+    var media_feature = ident;
+
+    var ruleset_or_viewport_list = jcon.lazy(function(){
+        return jcon.seq(ruleset_or_viewport_list.possible(), jcon.or(ruleset, viewport));
+    });
+    var medium = jcon.seq(ident, space_list.possible());
+    var declaration_list = jcon.lazy(function(){
+        return jcon.or(
+                declaration,
+                jcon.seq(delcaration_list.possible(), jcon.string(';'), space_list.possible(), declaration.possible()));
+    });
+    var page = jcon.seq(page_sym, space_list.possible(), ident.possible(), pseudo_page.possible(). space_list.possible, jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
+
+    var pseudo_page = jcon.seq(jcon.string(':'), ident);
+
+    var font_face = jcon.seq(font_face_sym, space_list.possible(), jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
+
+
+    var ruleset = jcon.seq(shorthair, jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
 
     return stylesheet;
 
