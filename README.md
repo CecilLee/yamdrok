@@ -2,6 +2,10 @@ yamdrok
 =========
 
 
+    没有什么能够比自我选择的孤独更能解放人了。
+
+                    for 羊卓雍措
+
 ![yamdrok](http://github.com/takumi4ichi/yamdrok/raw/master/pic/yamdrok-0013.jpg)
 
 
