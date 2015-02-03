@@ -139,17 +139,17 @@ var yamdrok = (function(){
         );
     });
 
-
-    var media = jcon.seq(media_sym, space_list.possible(), media_query_list.possible(), jcon.string('{'), space_list.possible(), ruleset_or_viewport_list.possible(), jcon.string('}'), space_list.possible());
-
-    var media_expression = jcon.seq(jcon.string('('), space_list.possible(), media_feature, space_list.possible(), jcon.seq(jcon.string(':'), space_list.possible(), expr).possible(), jcon.string(')'), space_list.possible());
-
-    var media_feature = ident;
-
     var ruleset_or_viewport_list = jcon.lazy(function(){
         return jcon.seq(ruleset_or_viewport_list.possible(), jcon.or(ruleset, viewport));
     });
-    var page = jcon.seq(page_sym, space_list.possible(), ident.possible(), pseudo_page.possible(). space_list.possible, jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
+
+    var media = jcon.seq(media_sym, space_list.possible(), media_query_list.possible(), jcon.string('{'), space_list.possible(), ruleset_or_viewport_list.possible(), jcon.string('}'), space_list.possible());
+
+    var media_expression = jcon.seq(jcon.string('('), space_list.possible(), media_feature, space_list.possible(), jcon.seq(jcon.string(':'), space_list.possible()/*, expr*/).possible(), jcon.string(')'), space_list.possible());
+
+    var media_feature = ident;
+
+    var page = jcon.seq(page_sym, space_list.possible(), ident.possible(), pseudo_page.possible(), space_list.possible(), jcon.string('{'), space_list.possible(), declaration_list.possible(), jcon.string('}'), space_list.possible());
 
 
     var stylesheet = jcon.seq(charset.possible(), scd_list.possible(), import_list.possible(), namespace_list.possible(), entity_list.possible());
