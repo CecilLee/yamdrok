@@ -22,8 +22,8 @@
     "node": ">= 0.8.0"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-nodeunit": "^0.4.1"
+    "gulp": "^3.8.11",
+    "gulp-nodeunit": "0.0.5"
   },
   "dependencies": {
     "jcon": "^0.2.6",
