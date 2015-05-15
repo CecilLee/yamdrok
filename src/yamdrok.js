@@ -83,14 +83,11 @@ var yamdrok = (function(){
         expr).setAst('declaration');
 
 
-    /*
-    var declaration_list = jcon.or(declaration,
-        jcon.seq(declaration_list, jcon.string(';'), space_list, declaration.possible())).setAst();
-        */
     var declaration_list = jcon.or(declaration,
         jcon.seq(declaration, jcon.string(';'))).many();
 
-    var ruleset = jcon.seq(shorthair, jcon.string('{'), space_list, declaration_list.possible(), jcon.string('}'), space_list).setAst('ruleset');
+
+    var ruleset = jcon.seq(shorthair.setAst('selectors'), jcon.string('{'), space_list, declaration_list.possible(), jcon.string('}'), space_list).setAst('ruleset');
 
     var entity_list = jcon.or(
         ruleset,

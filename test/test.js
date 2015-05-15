@@ -6,17 +6,80 @@
 
 'use strict';
 
-var should = require('should');
-var yamdrok = require('../src/yamdrok');
 var assert = require('assert');
+var chai = require('chai');
+var should = chai.should();
+var yamdrok = require('../src/yamdrok');
 
-var csstext;
+chai.config.showDiff = true;
 
-describe('simple cssrule', function(){
-        csstext = 'div{background:red}';
+describe('css syntax', function(){
 
-        console.log(yamdrok.parse(csstext).ast());
-        assert.deepEqual(yamdrok.parse(csstext).ast(), {
-        }, csstext);
+    describe('declaration', function(){
+        var csstext = 'div{background:red}';
+        var ast = yamdrok.parse(csstext).ast();
+
+        /*[
+            {
+                "type": "stylesheet",
+                "value": "div{background:red}",
+                "childs": [
+                    {
+                        "type": "ruleset",
+                        "value": "div{background:red}",
+                        "childs": [
+                            {
+                                "type": "selectors",
+                                "value": "div",
+                                "childs": [
+                                    {
+                                        "type": "element_name",
+                                        "value": "div"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "declaration",
+                                "value": "background:red",
+                                "childs": [
+                                    {
+                                        "type": "property",
+                                        "value": "background"
+                                    },
+                                    {
+                                        "type": "expr",
+                                        "value": "green"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];*/
+
+        ast.should.to.have.deep.property('[0].type','stylesheet');
+
+        ast.should.to.have.deep.property('[0].childs[0].type','ruleset');
+
+        ast.should.to.have.deep.property('[0].childs[0].childs[0].type','selectors');
+        ast.should.to.have.deep.property('[0].childs[0].childs[0].value','div');
+
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].type','declaration');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].value','background:red');
+
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].type','property');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].value','background');
+
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].type','expr');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].value','red');
+
+
+    });
+
+
+    describe('import', function(){
+    });
+
 
 });
