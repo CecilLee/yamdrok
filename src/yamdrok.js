@@ -24,6 +24,8 @@ var yamdrok = (function(){
     var invalid1 = jcon.string('"').seq(jcon.regex(/[^\n\r\f\\"]/).or(nl, nonascii, escape).many()).type('invalid1');
     var invalid2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many()).type('invalid2');
     var invalid = invalid1.or(invalid2).type('invalid');
+    var hash = jcon.string('#');
+    var hexcolor = jcon.seq(hash, nmchar.least(1));
 
 
     var h = jcon.regex(/[0-9a-f]/);
@@ -73,9 +75,9 @@ var yamdrok = (function(){
 
     var property = jcon.seq(ident, space_list).setAst('property');
 
-    var term = jcon.seq(jcon.or(string, ident), space_list);
+    var term = jcon.seq(jcon.or(string, ident, hexcolor), space_list);
     var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), space_list);
-    var expr = jcon.seq(operator.possible(), term).least(1).setAst('expr');
+    var expr = term.setAst('expr');
 
     var declaration = jcon.seq(property,
         jcon.string(':'),

@@ -16,7 +16,7 @@ chai.config.showDiff = true;
 describe('css syntax', function(){
 
     describe('declaration', function(){
-        var csstext = 'div{background:red}';
+        var csstext = 'div{background:#fff}';
         var ast = yamdrok.parse(csstext).ast();
 
         /*[
@@ -66,13 +66,13 @@ describe('css syntax', function(){
         ast.should.to.have.deep.property('[0].childs[0].childs[0].value','div');
 
         ast.should.to.have.deep.property('[0].childs[0].childs[1].type','declaration');
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].value','background:red');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].value','background:#fff');
 
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].type','property');
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].value','background');
 
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].type','expr');
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].value','red');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].value','#fff');
 
 
     });
