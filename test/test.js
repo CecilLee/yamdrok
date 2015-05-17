@@ -65,14 +65,17 @@ describe('css syntax', function(){
         ast.should.to.have.deep.property('[0].childs[0].childs[0].type','selectors');
         ast.should.to.have.deep.property('[0].childs[0].childs[0].value','div');
 
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].type','declaration');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].type','declaration_list');
         ast.should.to.have.deep.property('[0].childs[0].childs[1].value','background:#fff');
 
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].type','property');
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].value','background');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].type','declaration');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].value','background:#fff');
 
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].type','expr');
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[1].value','#fff');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[0].type','property');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[0].value','background');
+
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[1].type','expr');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[1].value','#fff');
 
 
     });
