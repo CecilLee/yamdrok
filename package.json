@@ -27,7 +27,7 @@
     "chai": "^2.3.0"
   },
   "dependencies": {
-    "jcon": "^0.2.6",
+    "jcon": "^0.2.7",
     "shorthair": "^0.1.7"
   },
   "keywords": [

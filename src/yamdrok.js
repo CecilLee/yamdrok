@@ -10,6 +10,9 @@ var yamdrok = (function(){
     var shorthair = require('shorthair');
 
     var nonascii = jcon.regex(/[^\0-\177]/).type('nonascii');
+    var space = jcon.regex(/[ \t\r\n\f]/);      //\s还多包含一个垂直制表符\v
+    var space_list = jcon.regex(/[ \t\r\n\f]+/);      //\s还多包含一个垂直制表符\v
+    var skips = jcon.regex(/[ \t\r\n\f]*/).skip();  //不合并到解析结果，要忽略掉的可选空白符
     var unicode = jcon.regex(/\\[0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?/).type('unicode');
     var escape = unicode.or(jcon.regex(/\\[^\n\r\f0-9a-f]/)).type('escape');
     var nmchar = jcon.regex(/[_a-z0-9-]/).or(nonascii, escape).type('nmchar');
@@ -25,13 +28,13 @@ var yamdrok = (function(){
     var invalid2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many()).type('invalid2');
     var invalid = invalid1.or(invalid2).type('invalid');
     var hash = jcon.string('#');
+    var colon = jcon.string(':');
+    var semicolon = jcon.string(';');
     var hexcolor = jcon.seq(hash, nmchar.least(1));
 
-
     var h = jcon.regex(/[0-9a-f]/);
-    var S = jcon.regex(/[ \t\r\n\f]+/);
-    var CDO = jcon.regex(/\<\!\-\-/);
-    var CDC = jcon.regex(/\-\-\>/);
+    var comment_open = jcon.regex(/\<\!\-\-/);
+    var comment_close = jcon.regex(/\-\-\>/);
 
     var import_sym = jcon.string('@import');
     var page_sym = jcon.string('@page');
@@ -44,13 +47,12 @@ var yamdrok = (function(){
     var ident = jcon.regex(/[-]?/).seq(nmstart, nmchar.many()).type('ident');
 
 
-    var pseudo_page = jcon.seq(jcon.string(':'), ident);
+    var pseudo_page = jcon.seq(semicolon, ident);
 
 
-    var space_list = S.many().skip();
 
     var scd_list = jcon.lazy(function(){
-        return jcon.seq(scd_list.possible(), jcon.or(S, CDO, CDC));
+        return jcon.seq(scd_list.possible(), jcon.or(space, comment_open, comment_close));
     });
     
 
@@ -73,30 +75,29 @@ var yamdrok = (function(){
       supports
     */
 
-    var property = jcon.seq(ident, space_list).setAst('property');
+    var property = jcon.seq(ident, skips).setAst('property');
 
-    var term = jcon.seq(jcon.or(string, ident, hexcolor), space_list);
-    var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), space_list);
+    var term = jcon.seq(jcon.or(string, ident, hexcolor), skips);
+    var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), skips);
     var expr = term.setAst('expr');
 
     var declaration = jcon.seq(property,
-        jcon.string(':'),
-        space_list,
+        colon,
+        skips,
         expr).setAst('declaration');
 
 
-    var declaration_list = jcon.or(declaration,
-        jcon.seq(declaration, jcon.string(';'))).many();
+    var declaration_list = jcon.or(declaration.lookhead(jcon.string('}')),
+        jcon.seq(declaration, semicolon, skips)).many().setAst('declaration_list');
 
 
-    var ruleset = jcon.seq(shorthair.setAst('selectors'), jcon.string('{'), space_list, declaration_list.possible(), jcon.string('}'), space_list).setAst('ruleset');
+    var ruleset = jcon.seq(shorthair.setAst('selectors'), jcon.string('{'), skips, declaration_list.possible(), jcon.string('}'), skips).setAst('ruleset');
 
     var entity_list = jcon.or(
         ruleset,
         jcon.seq(entity_list, ruleset));
 
     var stylesheet = jcon.seq(/*charset.possible(), scd_list.possible(), import_list.possible(), namespace_list.possible(),*/ entity_list.possible()).setAst('stylesheet');
-
 
 
     return stylesheet;
