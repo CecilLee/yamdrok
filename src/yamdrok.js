@@ -31,6 +31,9 @@ var yamdrok = (function(){
     var colon = jcon.string(':');
     var semicolon = jcon.string(';');
     var hexcolor = jcon.seq(hash, nmchar.least(1));
+    var url = jcon.or(jcon.regex(/[!#$%&*-~]/), nonascii, escape).many();
+    var uri = jcon.seq(jcon.string('url('), skips, jcon.or(string1, string2, url), skips, jcon.string(')'));
+    var resolution = jcon.seq(num, jcon.regex(/dpi|dpcm/));
 
     var h = jcon.regex(/[0-9a-f]/);
     var comment_open = jcon.regex(/\<\!\-\-/);
@@ -47,7 +50,7 @@ var yamdrok = (function(){
     var ident = jcon.regex(/[-]?/).seq(nmstart, nmchar.many()).type('ident');
 
 
-    var pseudo_page = jcon.seq(semicolon, ident);
+    var pseudo_page = jcon.seq(colon, ident);
 
 
 
@@ -77,15 +80,26 @@ var yamdrok = (function(){
 
     var property = jcon.seq(ident, skips).setAst('property');
 
-    var term = jcon.seq(jcon.or(string, ident, hexcolor), skips);
+    var term = jcon.or(string,
+        ident,
+        uri,
+        resolution,
+        hexcolor).setAst('term');
+
     var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), skips);
-    var expr = term.setAst('expr');
+
+
+    var expr = jcon.lazy(function(){
+        return jcon.seq(term, expr_rest);
+    });
+    var expr_rest = jcon.or(jcon.string(''), jcon.seq(operator, expr));
+
+    var expr_list = jcon.seq(jcon.or(expr, jcon.seq(expr, jcon.regex(/[ \t\f]/), skips)).least(1), skips).setAst('expr_list');
 
     var declaration = jcon.seq(property,
         colon,
         skips,
-        expr).setAst('declaration');
-
+        expr_list).setAst('declaration');
 
     var declaration_list = jcon.or(declaration.lookhead(jcon.string('}')),
         jcon.seq(declaration, semicolon, skips)).many().setAst('declaration_list');
