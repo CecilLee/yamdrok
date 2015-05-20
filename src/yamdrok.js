@@ -9,6 +9,8 @@ var yamdrok = (function(){
     var jcon = require('jcon');
     var shorthair = require('shorthair');
 
+    var epsilon = jcon.string('');
+
     var nonascii = jcon.regex(/[^\0-\177]/).type('nonascii');
     var space = jcon.regex(/[ \t\r\n\f]/);      //\s还多包含一个垂直制表符\v
     var space_list = jcon.regex(/[ \t\r\n\f]+/);      //\s还多包含一个垂直制表符\v
@@ -19,7 +21,7 @@ var yamdrok = (function(){
     var nmstart = jcon.regex(/[_a-z]/).or(nonascii, escape).type('nmstart');
     var ident = jcon.regex(/[-]?/).seq(nmstart, nmchar.many()).type('ident');
     var name = nmchar.least(1).type('name');
-    var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/).type('num');
+    var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/).type('num').setAst('number');
     var nl = jcon.regex(/\n|\r\n|\r|\f/).type('nl');
     var string1 = jcon.string('"').seq(jcon.regex(/[^\n\r\f\\"]/).or(nl, nonascii, escape).many(), jcon.string('"')).type('string1');
     var string2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many(), jcon.string("'")).type('string2');
@@ -34,6 +36,21 @@ var yamdrok = (function(){
     var url = jcon.or(jcon.regex(/[!#$%&*-~]/), nonascii, escape).many();
     var uri = jcon.seq(jcon.string('url('), skips, jcon.or(string1, string2, url), skips, jcon.string(')'));
     var resolution = jcon.seq(num, jcon.regex(/dpi|dpcm/));
+
+    var product = jcon.lazy(function(){
+        return jcon.or(num,
+                jcon.seq(num, product_rest));
+    }).setAst('product');
+    var product_operator = jcon.regex(/[\*\/]/).setAst('operator');
+    var product_rest = jcon.or(epsilon, jcon.seq(skips, product_operator, skips, product));
+    var sum = jcon.lazy(function(){
+        return jcon.or(product, 
+                jcon.seq(product, sum_rest));
+    }).setAst('sum');
+    var sum_operator = jcon.regex(/[\+\-]/).setAst('operator');
+    var sum_rest = jcon.or(epsilon, jcon.seq(skips, sum_operator, skips, sum));
+    var calc = jcon.seq(jcon.string('calc('), skips, sum, skips, jcon.string(')'));
+    var math = jcon.seq(calc, skips);
 
     var h = jcon.regex(/[0-9a-f]/);
     var comment_open = jcon.regex(/\<\!\-\-/);
@@ -84,15 +101,15 @@ var yamdrok = (function(){
         ident,
         uri,
         resolution,
+        math,
         hexcolor).setAst('term');
 
     var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), skips);
 
-
     var expr = jcon.lazy(function(){
         return jcon.seq(term, expr_rest);
     });
-    var expr_rest = jcon.or(jcon.string(''), jcon.seq(operator, expr));
+    var expr_rest = jcon.or(epsilon, jcon.seq(operator, expr));
 
     var expr_list = jcon.seq(jcon.or(expr, jcon.seq(expr, jcon.regex(/[ \t\f]/), skips)).least(1), skips).setAst('expr_list');
 
