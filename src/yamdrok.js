@@ -21,7 +21,7 @@ var yamdrok = (function(){
     var nmstart = jcon.regex(/[_a-z]/).or(nonascii, escape).type('nmstart');
     var ident = jcon.regex(/[-]?/).seq(nmstart, nmchar.many()).type('ident');
     var name = nmchar.least(1).type('name');
-    var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/).type('num').setAst('number');
+    var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/).type('num');
     var nl = jcon.regex(/\n|\r\n|\r|\f/).type('nl');
     var string1 = jcon.string('"').seq(jcon.regex(/[^\n\r\f\\"]/).or(nl, nonascii, escape).many(), jcon.string('"')).type('string1');
     var string2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many(), jcon.string("'")).type('string2');
@@ -36,21 +36,36 @@ var yamdrok = (function(){
     var url = jcon.or(jcon.regex(/[!#$%&*-~]/), nonascii, escape).many();
     var uri = jcon.seq(jcon.string('url('), skips, jcon.or(string1, string2, url), skips, jcon.string(')'));
     var resolution = jcon.seq(num, jcon.regex(/dpi|dpcm/));
+    var dimension = jcon.seq(num, ident);
+    var percentage = jcon.seq(num, jcon.string('%'));
+    var unary_operator = jcon.regex(/[\+\-]/);
+    var length = jcon.seq(num, jcon.regex(/(px|cm|mm|in|pt|pc)/));
+    var ems = jcon.seq(num, jcon.regex(/(em|rem)/));
+    var exs = jcon.seq(num, jcon.string('ex'));
+    var angle = jcon.seq(num, jcon.regex(/(deg|rad|grad)/));
+    var time = jcon.seq(num, jcon.regex(/(s|ms)/));
+    var freq = jcon.seq(num, jcon.regex(/Hz|kHz/));
+
+
+    var unit = jcon.or(num, dimension, percentage).setAst('unit');
 
     var product = jcon.lazy(function(){
-        return jcon.or(num,
-                jcon.seq(num, product_rest));
+        return jcon.or(unit,
+                jcon.seq(unit, product_rest));
     }).setAst('product');
     var product_operator = jcon.regex(/[\*\/]/).setAst('operator');
     var product_rest = jcon.or(epsilon, jcon.seq(skips, product_operator, skips, product));
+
     var sum = jcon.lazy(function(){
         return jcon.or(product, 
                 jcon.seq(product, sum_rest));
     }).setAst('sum');
     var sum_operator = jcon.regex(/[\+\-]/).setAst('operator');
     var sum_rest = jcon.or(epsilon, jcon.seq(skips, sum_operator, skips, sum));
-    var calc = jcon.seq(jcon.string('calc('), skips, sum, skips, jcon.string(')'));
+
+    var calc = jcon.seq(jcon.string('calc('), skips, sum, skips, jcon.string(')')).setAst('calc');
     var math = jcon.seq(calc, skips);
+
 
     var h = jcon.regex(/[0-9a-f]/);
     var comment_open = jcon.regex(/\<\!\-\-/);
@@ -97,7 +112,20 @@ var yamdrok = (function(){
 
     var property = jcon.seq(ident, skips).setAst('property');
 
-    var term = jcon.or(string,
+    var term = jcon.or(
+        jcon.seq(unary_operator.possible(),
+            jcon.or(percentage,
+                num,
+                length,
+                ems,
+                exs,
+                angle,
+                time,
+                freq
+            ),
+            skips
+        ),
+        string,
         ident,
         uri,
         resolution,
@@ -121,7 +149,6 @@ var yamdrok = (function(){
     var declaration_list = jcon.or(declaration.lookhead(jcon.string('}')),
         jcon.seq(declaration, semicolon, skips)).many().setAst('declaration_list');
 
-
     var ruleset = jcon.seq(shorthair.setAst('selectors'), jcon.string('{'), skips, declaration_list.possible(), jcon.string('}'), skips).setAst('ruleset');
 
     var entity_list = jcon.or(
@@ -129,7 +156,6 @@ var yamdrok = (function(){
         jcon.seq(entity_list, ruleset));
 
     var stylesheet = jcon.seq(/*charset.possible(), scd_list.possible(), import_list.possible(), namespace_list.possible(),*/ entity_list.possible()).setAst('stylesheet');
-
 
     return stylesheet;
 
