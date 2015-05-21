@@ -51,15 +51,15 @@ var yamdrok = (function(){
 
     var product = jcon.lazy(function(){
         return jcon.or(unit,
-                jcon.seq(unit, product_rest));
-    }).setAst('product');
+                jcon.seq(unit, product_rest).setAst('product'));
+    });
     var product_operator = jcon.regex(/[\*\/]/).setAst('operator');
     var product_rest = jcon.or(epsilon, jcon.seq(skips, product_operator, skips, product));
 
     var sum = jcon.lazy(function(){
         return jcon.or(product, 
-                jcon.seq(product, sum_rest));
-    }).setAst('sum');
+                jcon.seq(product, sum_rest).setAst('sum'));
+    });
     var sum_operator = jcon.regex(/[\+\-]/).setAst('operator');
     var sum_rest = jcon.or(epsilon, jcon.seq(skips, sum_operator, skips, sum));
 
