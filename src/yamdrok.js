@@ -21,7 +21,10 @@ var yamdrok = (function(){
     var nmstart = jcon.regex(/[_a-z]/).or(nonascii, escape).type('nmstart');
     var ident = jcon.regex(/[-]?/).seq(nmstart, nmchar.many()).type('ident');
     var name = nmchar.least(1).type('name');
-    var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/).type('num');
+
+    //因为js的正则中的或运算，并不会返回最长匹配结果，而是依据短路模式
+    //所以没有使用 var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/);
+    var num = jcon.or(jcon.regex(/[0-9]+/), jcon.regex(/[0-9]*\.[0-9]+/));
     var nl = jcon.regex(/\n|\r\n|\r|\f/).type('nl');
     var string1 = jcon.string('"').seq(jcon.regex(/[^\n\r\f\\"]/).or(nl, nonascii, escape).many(), jcon.string('"')).type('string1');
     var string2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many(), jcon.string("'")).type('string2');
@@ -112,30 +115,28 @@ var yamdrok = (function(){
 
     var property = jcon.seq(ident, skips).setAst('property');
 
-    var term = jcon.or(
-        jcon.seq(unary_operator.possible(),
-            jcon.or(percentage,
-                num,
-                length,
-                ems,
-                exs,
-                angle,
-                time,
-                freq
-            ),
-            skips
+    var term = jcon.seq(unary_operator.possible(),
+        jcon.or(percentage,
+            num,
+            length,
+            exs,
+            ems,
+            angle,
+            time,
+            freq,
+            string,
+            ident,
+            uri,
+            resolution,
+            math,
+            hexcolor
         ),
-        string,
-        ident,
-        uri,
-        resolution,
-        math,
-        hexcolor).setAst('term');
+        skips);
 
     var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), skips);
 
     var expr = jcon.lazy(function(){
-        return jcon.seq(term, expr_rest);
+        return jcon.or(term, jcon.seq(term, expr_rest)).setAst('expr');
     });
     var expr_rest = jcon.or(epsilon, jcon.seq(operator, expr));
 
@@ -151,9 +152,8 @@ var yamdrok = (function(){
 
     var ruleset = jcon.seq(shorthair.setAst('selectors'), jcon.string('{'), skips, declaration_list.possible(), jcon.string('}'), skips).setAst('ruleset');
 
-    var entity_list = jcon.or(
-        ruleset,
-        jcon.seq(entity_list, ruleset));
+    var entity_list = jcon.or(ruleset).many()
+
 
     var stylesheet = jcon.seq(/*charset.possible(), scd_list.possible(), import_list.possible(), namespace_list.possible(),*/ entity_list.possible()).setAst('stylesheet');
 
