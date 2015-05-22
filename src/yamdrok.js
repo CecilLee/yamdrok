@@ -130,8 +130,7 @@ var yamdrok = (function(){
             resolution,
             math,
             hexcolor
-        ),
-        skips);
+        ));
 
     var operator = jcon.seq(jcon.or(jcon.string('/'), jcon.string(',')), skips);
 
@@ -140,7 +139,7 @@ var yamdrok = (function(){
     });
     var expr_rest = jcon.or(epsilon, jcon.seq(operator, expr));
 
-    var expr_list = jcon.seq(jcon.or(expr, jcon.seq(expr, jcon.regex(/[ \t\f]/), skips)).least(1), skips).setAst('expr_list');
+    var expr_list = jcon.seq(jcon.or(expr, jcon.seq(expr, jcon.regex(/[ \t\f]/))), skips).least(1).setAst('expr_list');
 
     var declaration = jcon.seq(property,
         colon,
