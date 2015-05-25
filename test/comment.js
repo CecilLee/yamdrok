@@ -5,7 +5,7 @@ var chai = require('chai');
 var should = chai.should();
 var jcon = require('jcon');
 
-describe('css number', function(){
+describe('css comment', function(){
     var comment = jcon.seq(jcon.string('/*'),
                     jcon.or(jcon.noInStr('*'), jcon.string('*').noLookhead(jcon.string('/'))).many(),
                     jcon.string('*/'));
