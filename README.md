@@ -16,7 +16,7 @@ yamdrok
 
 ##yamdrok是什么
 
-yamdrok是css-parser，遵从[w3c css21-grammar](http://www.w3.org/TR/CSS21/grammar.html)标准。
+yamdrok是css-parser，遵从[w3c css3-grammar](http://www.w3.org/TR/css-syntax-3/)标准。
 
 
 ##关于作者
