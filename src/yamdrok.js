@@ -13,6 +13,29 @@ var yamdrok = (function(){
 
     var epsilon = jcon.string('');
 
+    var comment = jcon.seq(jcon.string('/*'),
+                    jcon.or(jcon.noInStr('*'), jcon.string('*').noLookhead(jcon.string('/'))).many(),
+                    jcon.string('*/'));
+
+
+
+    var digit = jcon.regex(/[0-9]/);
+    var number = jcon.seq(jcon.or(jcon.string('+'), jcon.string('-').possible()),
+            jcon.or(
+                jcon.seq(digit.least(1), jcon.string('.'), digit.least(1)),
+                digit.least(1),
+                jcon.seq(jcon.string('.'), digit.least(1))
+            ),
+            jcon.seq(jcon.or(jcon.string('e'), jcon.string('E')),
+                jcon.or(jcon.string('+'), jcon.string('-')).possible(),
+                digit.least(1)
+            ).possible()
+    );
+
+
+
+
+
     var nonascii = jcon.regex(/[^\0-\177]/).type('nonascii');
     var space = jcon.regex(/[ \t\r\n\f]/);      //\s还多包含一个垂直制表符\v
     var space_list = jcon.regex(/[ \t\r\n\f]+/);      //\s还多包含一个垂直制表符\v
@@ -26,7 +49,9 @@ var yamdrok = (function(){
 
     //因为js的正则中的或运算，并不会返回最长匹配结果，而是依据短路模式
     //所以没有使用 var num = jcon.regex(/[0-9]+|[0-9]*\.[0-9]+/);
-    var num = jcon.or(jcon.regex(/[0-9]+/), jcon.regex(/[0-9]*\.[0-9]+/));
+    //var num = jcon.or(jcon.regex(/[0-9]+/), jcon.regex(/[0-9]*\.[0-9]+/));
+    //
+    //
     var nl = jcon.regex(/\n|\r\n|\r|\f/).type('nl');
     var string1 = jcon.string('"').seq(jcon.regex(/[^\n\r\f\\"]/).or(nl, nonascii, escape).many(), jcon.string('"')).type('string1');
     var string2 = jcon.string("'").seq(jcon.regex(/[^\n\r\f\\']/).or(nl, nonascii, escape).many(), jcon.string("'")).type('string2');
@@ -40,19 +65,19 @@ var yamdrok = (function(){
     var hexcolor = jcon.seq(hash, nmchar.least(1));
     var url = jcon.or(jcon.regex(/[!#$%&*-~]/), nonascii, escape).many();
     var uri = jcon.seq(jcon.string('url('), skips, jcon.or(string1, string2, url), skips, jcon.string(')'));
-    var resolution = jcon.seq(num, jcon.regex(/dpi|dpcm/));
-    var dimension = jcon.seq(num, ident);
-    var percentage = jcon.seq(num, jcon.string('%'));
+    var resolution = jcon.seq(number, jcon.regex(/dpi|dpcm/));
+    var dimension = jcon.seq(number, ident);
+    var percentage = jcon.seq(number, jcon.string('%'));
     var unary_operator = jcon.regex(/[\+\-]/);
-    var length = jcon.seq(num, jcon.regex(/(px|cm|mm|in|pt|pc)/));
-    var ems = jcon.seq(num, jcon.regex(/(em|rem)/));
-    var exs = jcon.seq(num, jcon.string('ex'));
-    var angle = jcon.seq(num, jcon.regex(/(deg|rad|grad)/));
-    var time = jcon.seq(num, jcon.regex(/(s|ms)/));
-    var freq = jcon.seq(num, jcon.regex(/Hz|kHz/));
+    var length = jcon.seq(number, jcon.regex(/(px|cm|mm|in|pt|pc)/));
+    var ems = jcon.seq(number, jcon.regex(/(em|rem)/));
+    var exs = jcon.seq(number, jcon.string('ex'));
+    var angle = jcon.seq(number, jcon.regex(/(deg|rad|grad)/));
+    var time = jcon.seq(number, jcon.regex(/(s|ms)/));
+    var freq = jcon.seq(number, jcon.regex(/Hz|kHz/));
 
 
-    var unit = jcon.or(num, dimension, percentage).setAst('unit');
+    var unit = jcon.or(number, dimension, percentage).setAst('unit');
 
     var product = jcon.lazy(function(){
         return jcon.or(unit,
@@ -119,7 +144,7 @@ var yamdrok = (function(){
 
     var term = jcon.seq(unary_operator.possible(),
         jcon.or(percentage,
-            num,
+            number,
             length,
             exs,
             ems,

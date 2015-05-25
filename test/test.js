@@ -74,7 +74,7 @@ describe('css syntax', function(){
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[0].type','property');
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[0].value','background');
 
-        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[1].type','expr');
+        ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[1].type','expr_list');
         ast.should.to.have.deep.property('[0].childs[0].childs[1].childs[0].childs[1].value','#fff');
 
 
