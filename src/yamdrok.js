@@ -13,25 +13,12 @@ var yamdrok = (function(){
 
     var epsilon = jcon.string('');
 
-    var comment = jcon.seq(jcon.string('/*'),
-                    jcon.or(jcon.noInStr('*'), jcon.string('*').noLookhead(jcon.string('/'))).many(),
-                    jcon.string('*/'));
-
-
+    var comment = require('./comment');
+    var number = require('./number');
+    var whitespace = require('./whitespace');
+    var newline = require('./newline');
 
     var digit = jcon.regex(/[0-9]/);
-    var number = jcon.seq(jcon.or(jcon.string('+'), jcon.string('-').possible()),
-            jcon.or(
-                jcon.seq(digit.least(1), jcon.string('.'), digit.least(1)),
-                digit.least(1),
-                jcon.seq(jcon.string('.'), digit.least(1))
-            ),
-            jcon.seq(jcon.or(jcon.string('e'), jcon.string('E')),
-                jcon.or(jcon.string('+'), jcon.string('-')).possible(),
-                digit.least(1)
-            ).possible()
-    );
-
 
 
 

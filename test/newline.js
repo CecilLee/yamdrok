@@ -3,11 +3,10 @@
 var assert = require('assert');
 var chai = require('chai');
 var should = chai.should();
-var jcon = require('jcon');
 
 describe('css newline', function(){
 
-    var newline = jcon.regex(/(?:\r\n|[\r\n\f])/);
+    var newline = require('../src/newline');;
 
     newline.parse('\r').should.to.have.deep.property('value', '\r'); 
     newline.parse('\n').should.to.have.deep.property('value', '\n'); 

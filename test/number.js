@@ -3,21 +3,9 @@
 var assert = require('assert');
 var chai = require('chai');
 var should = chai.should();
-var jcon = require('jcon');
 
 describe('css number', function(){
-    var digit = jcon.regex(/[0-9]/);
-    var number = jcon.seq(jcon.or(jcon.string('+'), jcon.string('-').possible()),
-            jcon.or(
-                jcon.seq(digit.least(1), jcon.string('.'), digit.least(1)),
-                digit.least(1),
-                jcon.seq(jcon.string('.'), digit.least(1))
-            ),
-            jcon.seq(jcon.or(jcon.string('e'), jcon.string('E')),
-                jcon.or(jcon.string('+'), jcon.string('-')).possible(),
-                digit.least(1)
-            ).possible()
-    );
+    var number = require('../src/number');
 
     number.parse('0').should.to.have.deep.property('value', '0')
     number.parse('10').should.to.have.deep.property('value', '10')

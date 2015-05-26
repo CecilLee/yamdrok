@@ -3,15 +3,10 @@
 var assert = require('assert');
 var chai = require('chai');
 var should = chai.should();
-var jcon = require('jcon');
 
 describe('css whitespace', function(){
 
-    var newline = jcon.regex(/(?:\r\n|[\r\n\f])/);
-
-    var whitespace = jcon.or(jcon.string(' '),
-            jcon.string('\t'),
-            newline);
+    var whitespace = require('../src/whitespace');
 
     whitespace.parse('\r').should.to.have.deep.property('value', '\r'); 
     whitespace.parse('\n').should.to.have.deep.property('value', '\n'); 
