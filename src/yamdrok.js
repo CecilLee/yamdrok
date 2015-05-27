@@ -13,12 +13,15 @@ var yamdrok = (function(){
 
     var epsilon = jcon.string('');
 
-    var comment = require('./comment');
-    var number = require('./number');
-    var whitespace = require('./whitespace');
-    var newline = require('./newline');
+    var token = require('./token');
 
-    var digit = jcon.regex(/[0-9]/);
+    var comment = token.comment;
+    var number = token.number;
+    var whitespace = token.whitespace;
+    var newline = token.newline;
+
+    var digit = token.digit;
+    var hex_digit = token.hex_digit;
 
 
 
