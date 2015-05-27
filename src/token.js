@@ -3,6 +3,7 @@ var token = (function(){
 
     var digit = jcon.regex(/[0-9]/);
     var hex_digit = jcon.regex(/[0-9a-fA-F]/);
+    var nonascii = jcon.regex(/[^\0-\127]/);
     var newline = jcon.regex(/(?:\r\n|[\r\n\f])/);
     var whitespace = jcon.or(jcon.string(' '),
         jcon.string('\t'),
@@ -31,6 +32,39 @@ var token = (function(){
         )
     );
 
+    var whitespace_token = whitespace.least(1);
+
+    var ws_opt = whitespace.many();
+
+    var ident_token = jcon.seq(
+        jcon.string('-').possible(),
+        jcon.or(
+            jcon.or(jcon.regex(/[a-zA-Z_]/), nonascii),
+            escape
+        ),
+        jcon.or(
+            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), nonascii),
+            escape
+        ).many()
+    );
+
+    var function_token = jcon.seq(ident_token, jcon.string('('));
+
+    var at_keyword_token = jcon.seq(jcon.string('@'), ident_token);
+
+    var hash_token = jcon.seq(
+        jcon.string('#'),
+        jcon.or(
+            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), nonascii),
+            escape
+        ).least(1)
+    );
+
+
+
+
+
+
 
     return {
         digit: digit,
@@ -38,7 +72,9 @@ var token = (function(){
         comment: comment,
         newline: newline,
         whitespace: whitespace,
-        number: number
+        number: number,
+        ident_token: ident_token,
+        function_token: function_token
     };
 
 })();
