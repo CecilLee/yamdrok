@@ -6,7 +6,7 @@ var should = chai.should();
 
 describe('css whitespace', function(){
 
-    var whitespace = require('../src/whitespace');
+    var whitespace = require('../src/token').whitespace;
 
     whitespace.parse('\r').should.to.have.deep.property('value', '\r'); 
     whitespace.parse('\n').should.to.have.deep.property('value', '\n'); 

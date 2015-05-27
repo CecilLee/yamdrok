@@ -5,7 +5,7 @@ var chai = require('chai');
 var should = chai.should();
 
 describe('css number', function(){
-    var number = require('../src/number');
+    var number = require('../src/token').number;
 
     number.parse('0').should.to.have.deep.property('value', '0')
     number.parse('10').should.to.have.deep.property('value', '10')

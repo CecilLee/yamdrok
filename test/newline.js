@@ -6,7 +6,7 @@ var should = chai.should();
 
 describe('css newline', function(){
 
-    var newline = require('../src/newline');;
+    var newline = require('../src/token').newline;
 
     newline.parse('\r').should.to.have.deep.property('value', '\r'); 
     newline.parse('\n').should.to.have.deep.property('value', '\n'); 
