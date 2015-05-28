@@ -3,7 +3,8 @@ var token = (function(){
 
     var digit = jcon.regex(/[0-9]/);
     var hex_digit = jcon.regex(/[0-9a-fA-F]/);
-    var nonascii = jcon.regex(/[^\0-\127]/);
+    var non_ascii = jcon.regex(/[^\0-\127]/);
+    var non_printable = jcon.regex(/(?:[\0-\8]|[\11]|[\14-31]|[\127])/);
     var newline = jcon.regex(/(?:\r\n|[\r\n\f])/);
     var whitespace = jcon.or(jcon.string(' '),
         jcon.string('\t'),
@@ -32,37 +33,122 @@ var token = (function(){
         )
     );
 
-    var whitespace_token = whitespace.least(1);
+    var whitespace = whitespace.least(1);
 
     var ws_opt = whitespace.many();
 
-    var ident_token = jcon.seq(
+    var ident = jcon.seq(
         jcon.string('-').possible(),
         jcon.or(
-            jcon.or(jcon.regex(/[a-zA-Z_]/), nonascii),
+            jcon.or(jcon.regex(/[a-zA-Z_]/), non_ascii),
             escape
         ),
         jcon.or(
-            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), nonascii),
+            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), non_ascii),
             escape
         ).many()
     );
 
-    var function_token = jcon.seq(ident_token, jcon.string('('));
+    var function_token = jcon.seq(ident, jcon.string('('));
 
-    var at_keyword_token = jcon.seq(jcon.string('@'), ident_token);
+    var at_keyword = jcon.seq(jcon.string('@'), ident);
 
-    var hash_token = jcon.seq(
+    var hash = jcon.seq(
         jcon.string('#'),
         jcon.or(
-            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), nonascii),
+            jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), non_ascii),
             escape
         ).least(1)
     );
 
+    var string = jcon.or(
+        jcon.seq(
+            jcon.string('"'),
+            jcon.or(
+                jcon.or(jcon.string('"'), jcon.string('\\'), newline).not(),
+                escape,
+                jcon.seq(jcon.string('\\'), newline)
+            ).many(),
+            jcon.string('"')
+        ),
+        jcon.seq(
+            jcon.string("'"),
+            jcon.or(
+                jcon.or(jcon.string("'"), jcon.string('\\'), newline).not(),
+                escape,
+                jcon.seq(jcon.string('\\'), newline)
+            ).many(),
+            jcon.string("'")
+        )
+    );
+
+    var url_unquoted = jcon.or(
+        jcon.or(
+            jcon.string('"'),
+            jcon.string("'"),
+            jcon.string("("),
+            jcon.string(")"),
+            jcon.string("\\"),
+            whitespace,
+            non_printable
+        ).not(),
+        escape
+    ).many();
+
+    var url = jcon.seq(
+        ident,
+        jcon.string('url('),
+        ws_opt,
+        jcon.seq(
+            jcon.or(
+                url_unquoted,
+                string
+            ),
+            ws_opt
+        ).possible(),
+        jcon.string(')')
+    );
 
 
 
+    var dimension = jcon.seq(number, ident);
+
+
+    var percentage = jcon.seq(number, jcon.string('%'));
+
+
+    var unicode_range = jcon.seq(
+        jcon.or(
+            jcon.string('U'),
+            jcon.string('u')
+        ),
+        jcon.string('+'),
+        jcon.or(
+            hex_digit.times(1,6),
+            //这里有U+333???的模式目前jcon不支持
+            jcon.seq(
+                hex_digit.times(1, 6),
+                jcon.string('-'),
+                hex_digit.times(1, 6)
+            )
+        )
+    );
+
+    var include_match = jcon.string('~=');
+
+    var dash_match = jcon.string('|=');
+
+    var prefix_match = jcon.string('^=');
+
+    var suffix_match = jcon.string('$=');
+
+    var substring_match = jcon.string('*=');
+
+    var column = jcon.string('||');
+
+    var CDO = jcon.string('<!--');
+
+    var CDC = jcon.string('-->');
 
 
 
@@ -73,8 +159,23 @@ var token = (function(){
         newline: newline,
         whitespace: whitespace,
         number: number,
-        ident_token: ident_token,
-        function_token: function_token
+        ident: ident,
+        function_token: function_token,
+        at_keyword: at_keyword,
+        hash: hash,
+        string: string,
+        url: url,
+        dimension: dimension,
+        percentage: percentage,
+        unicode_range: unicode_range,
+        include_match: include_match,
+        dash_match: dash_match,
+        prefix_match: prefix_match,
+        suffix_match: suffix_match,
+        substring_match: substring_match,
+        column: column,
+        CDO: CDO,
+        CDC: CDC
     };
 
 })();
