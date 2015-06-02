@@ -3,10 +3,10 @@ var token = (function(){
 
     var digit = jcon.regex(/[0-9]/);
     var hex_digit = jcon.regex(/[0-9a-fA-F]/);
-    var non_ascii = jcon.regex(/[^\0-\127]/);
-    var non_printable = jcon.regex(/(?:[\0-\8]|[\11]|[\14-31]|[\127])/);
+    var non_ascii = jcon.regex(/[^\u0000-\u007f]/).type('non-ascii');
+    var non_printable = jcon.regex(/(?:[\u0000-\u0008]|[\u000b]|[\u000e-\u001f]|[\u007f])/);
     var newline = jcon.regex(/(?:\r\n|[\r\n\f])/);
-    var whitespace = jcon.or(jcon.string(' '),
+    var whitespace_chr = jcon.or(jcon.string(' '),
         jcon.string('\t'),
         newline
     );
@@ -27,15 +27,18 @@ var token = (function(){
                 digit.least(1)
             ).possible()
     );
+
+    var whitespace = whitespace_chr.least(1);
+
+    var ws_opt = whitespace_chr.many();
+
     var escape = jcon.seq(jcon.string('\\'),
         jcon.or(jcon.not(jcon.or(newline, hex_digit)),
             jcon.seq(hex_digit.times(1, 6), whitespace.possible())
         )
-    );
+    ).type('escape');
 
-    var whitespace = whitespace.least(1);
 
-    var ws_opt = whitespace.many();
 
     var ident = jcon.seq(
         jcon.string('-').possible(),
@@ -47,11 +50,11 @@ var token = (function(){
             jcon.or(jcon.regex(/[0-9a-zA-Z_\-]/), non_ascii),
             escape
         ).many()
-    );
+    ).type('ident');
 
-    var function_token = jcon.seq(ident, jcon.string('('));
+    var function_token = jcon.seq(ident, jcon.string('(')).type('function_token');
 
-    var at_keyword = jcon.seq(jcon.string('@'), ident);
+    var at_keyword = jcon.seq(jcon.string('@'), ident).type('at_keyword');
 
     var hash = jcon.seq(
         jcon.string('#'),
