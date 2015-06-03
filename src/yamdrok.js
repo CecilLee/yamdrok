@@ -2,8 +2,8 @@
  *
  * yamdrok
  *
- * var http = token.http;
  *
+ * http://www.w3.org/TR/css-syntax-3/
  *
  */
 var yamdrok = (function(){
